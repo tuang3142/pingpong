@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ping litle pong</title>
+	<meta charset="utf-8">
+</head>
+
+<body>
+<canvas id="game_canvas"></canvas>
+
+<script type="text/javascript">
+
+const FPS = 120; // frame per second
+
+var canvas;
+var canvasContext;
+
+var mouseX;
+var mouseY;
+
+const BALL_RADIUS = 5;
+var ballX = 10;
+var ballY = 10;
+var ballSpeedX = 15;
+var ballSpeedY = 17;
+
+const PADDLE_1_X = 60;
+var paddle1Y = 10;
+var paddle2Y = 10;
+var PADDLE_W = 7;
+var PADDLE_H = 100;
+
+window.onload = function() {
+	canvas = document.getElementById('game_canvas');
+	canvas.width = 1200;
+	canvas.height = 700;
+	canvasContext = canvas.getContext('2d');
+	
+	ballReset();
+	setInterval(function() {
+		draw();
+		animate();
+	}, 1000/FPS);
+
+	canvas.addEventListener('mousemove', updateMousePos);  
+}
+
+function draw() {
+	colorRect(0, 0, canvas.width, canvas.height, '#000000'); // draw main empty board
+
+	//paddle1Y = mouseY - PADDLE_H / 2;
+	colorRect(PADDLE_1_X, paddle1Y, PADDLE_W, PADDLE_H, '#ffffff'); //draw paddle 1
+
+	colorRect(0, ballY, 10, 10, '#ffffff'); //draw tracker for paddle 1
+
+	colorRect(canvas.width - PADDLE_1_X - PADDLE_W, paddle2Y, PADDLE_W, PADDLE_H, '#ffffff'); //draw paddle 2
+
+	colorRect(canvas.width - 10, ballY, 10, 10, '#ffffff'); //draw tracker for paddle 2
+
+	colorCir(ballX, ballY, BALL_RADIUS, '#ffffff'); // draw ball
+
+    colorText(mouseX + ' ,' + mouseY, mouseX, mouseY); // draw mouse position
+}
+
+function colorRect(topLeftX, topLeftY, width, height, color) {
+	canvasContext.fillStyle = color;
+	canvasContext.fillRect(topLeftX, topLeftY, width, height);
+}
+
+function colorCir(centerX, centerY, radius, color) {
+	canvasContext.beginPath();
+	canvasContext.fillStyle = color;
+	canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+	canvasContext.fill();
+}e
+
+function colorText(textContent, topLeftX, topLeftY, color) {
+	canvasContext.fillStyle = color;
+	canvasContext.fillText(textContent, topLeftX, topLeftY);
+}
+
+function animate() {
+	ballX += ballSpeedX;
+	ballY += ballSpeedY;
+
+	if(ballX < 0 || ballX > canvas.width) {
+		//ballSpeedX *= -1;
+		ballReset();
+	} // if ball go out of canvas
+
+	if(ballY < 0 || ballY > canvas.height) {
+		ballSpeedY *= -1;
+	} // if ball go out of canvas
+
+	var paddle1TopEdge = paddle1Y;
+	var paddle1BottomEdge = paddle1Y + PADDLE_H;
+	var paddle1LeftEdge = PADDLE_1_X;
+	var paddle1RightEdge = paddle1LeftEdge + PADDLE_W;
+	if(
+		ballX >= paddle1LeftEdge &&
+		ballX <= paddle1RightEdge &&
+		ballY >= paddle1TopEdge &&
+		ballY <= paddle1BottomEdge &&
+		ballSpeedX < 0
+	) {
+		ballSpeedX *= -1.1;
+		var centerOfPaddle = mouseY;
+		var ballDistFromCenter =  ballY - centerOfPaddle;
+		ballSpeedY = ballDistFromCenter * Math.PI / 100;
+		ballSpeedY *= 1.1;
+	}
+
+	var paddle2TopEdge = paddle2Y;
+	var paddle2BottomEdge = paddle2Y + PADDLE_H;
+	var paddle2LeftEdge = canvas.width - 77;
+	var paddle2RightEdge = paddle2LeftEdge + PADDLE_W;
+	if(
+		ballX >= paddle2LeftEdge &&
+		ballX <= paddle2RightEdge &&
+		ballY >= paddle2TopEdge &&
+		ballY <= paddle2BottomEdge &&
+		ballSpeedX > 0
+	) {
+		ballSpeedX *= -1.1;
+		var centerOfPaddle = mouseY;
+		var ballDistFromCenter =  ballY - centerOfPaddle;
+		ballSpeedY = ballDistFromCenter * Math.PI / 100;
+		ballSpeedY *= 1.1;
+	}
+}
+
+function ballReset() {
+	ballX = canvas.width / 2;
+	ballY = 0;
+	var dir = [-1, 1];
+	ballSpeedX = 2;
+	ballSpeedY = 3;
+	ballSpeedX *= dir[Math.floor(Math.random() * 2)];
+}
+
+function updateMousePos(evt) { // callback function
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+    
+    mouseX = evt.clientX - rect.left - root.scrollLeft;
+    mouseY = evt.clientY - rect.top - root.scrollTop;
+
+    paddle1Y = mouseY - PADDLE_H / 2;
+    paddle2Y = mouseY - PADDLE_H / 2;
+}
+
+
+</script>
+
+</body>
+</html>
